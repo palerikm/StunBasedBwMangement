@@ -15,13 +15,13 @@ script: make ghpages
 
 env:
   global:
-    - secure: "<insert encrypted GH_TOKEN=blah here>"
+    - secure: z/377N6N1/RNN35NWbJjjoDgCMrf3MT6q420BFuXregjgtKMsiwh6sKNmd2GG3e9XqqDe10+JyuEHRFw+zpdBCefw7Kks8zrCB2xmpOQfxjlm0Uwv4owPGaJ8lMd3Yen6tp1goZK7stA6uW1/FG99z3zgeY0XaNbyMvpGi7dUKU=
 
 before_deploy: make submit
 deploy:
   provider: releases
   api-key:
-    secure: "<insert encrypted API key here>"
+    secure: z/377N6N1/RNN35NWbJjjoDgCMrf3MT6q420BFuXregjgtKMsiwh6sKNmd2GG3e9XqqDe10+JyuEHRFw+zpdBCefw7Kks8zrCB2xmpOQfxjlm0Uwv4owPGaJ8lMd3Yen6tp1goZK7stA6uW1/FG99z3zgeY0XaNbyMvpGi7dUKU=
   file:
     - $TRAVIS_TAG.txt
     - $TRAVIS_TAG.html
