@@ -67,6 +67,12 @@
         used by the application to modify its behavior to optimize for
         QoE.
       </t>
+      <t>
+          The information provided from the application to the network can also 
+          be useful for middleboxes that are responsible for security at edges
+          of network (e.g. firewalls) or other middleboxes in determining
+          how to treat the packets delivered from this application. 
+      </t>
     </abstract>
     
     <note title="Requirements Language">
@@ -418,7 +424,43 @@
         describes such a mechanism.
       </t>
       <t>
-        When describing the stream with a STREAM-TYPE attribute there
+          At times, the different "streams" carried in this bundle require very
+          different treatment from the network, including the ability to 
+          prioritize some of these "streams" over others.  For example, the 
+          application my bundle video and audio in the same 5-tuple flow,
+          but would like the network to prioritize the delivery of audio
+          over that of video in the case of congestion.  Another example is
+          the use of embedded (or scalable) coding for video.  
+          Per <xref target="RFC6190">RFC 6190</xref>,
+          using Multi-session Transmission (MST)
+          the
+          layers are transported in seperate sub-flows (RTP sessions) within the 
+          bundled flow.
+          Using the STREAM-TYPE
+          attribute with the extension to identify the sub-flow and its 
+          priority would allow
+          network elements, if capable, to provide differentiated services
+          even in the case of bundling.
+      </t>
+      <t>
+          For RTP/SRTP based flows,
+          the existence and attributes for sub-flows in the flow MAY be indicated by the 
+          application
+          via the SUB-STREAM-xxx attributes.  These
+          attributes MUST only be included if the equivalent STREAM-xxxx 
+          attributes are included.  It is expected that only
+          a sub-set of network elements representing bottleneck Points in 
+          Network (PIN) will be able to inspect the higher
+          layer protocols to differentiate sub-flows, so it is important
+          to describe the agregate flow, and then the sub-flows.
+          The SUB-STREAM-xxxx attributes are similar
+          to the corresponding STREAM-xxxx attributes with the addition of
+          the application layer identifier field.  For the case of RTP/SRTP,
+          this field is the SSRC assigned to the flow.  Note that this will
+          only work for non-header encrypted SRTP.
+      </t>
+      <t>
+        When describing the aggregate stream with a STREAM-TYPE attribute there
         are two possibilities to describe the streams that are
         multiplexed. Adding one attribute for each type (Audio,
         Video,++), or to save a few bits on the wire it is also
@@ -426,7 +468,9 @@
         describes several types. For example audio have the value of 1
         and application data have the value of 4. If the STREAM_TYPE
         value is set to 5 the only combination that gives that is
-        audio and application data.
+        audio and application data.  As previously discussed, in the case of 
+          bundling, the agregate stream attribute MUST be included before the 
+          optional sub-stream attributes
       </t>
       <t>
         The other attributes BANDWIDTH-USAGE, STREAM-PRIORITY and
@@ -444,6 +488,9 @@
       0xXXX0: STREAM-TYPE
       0xXXX1: BANDWIDTH-USAGE
       0xXXX2: STREAM-PRIORITY
+      0xXXX8: SUB-STREAM-TYPE
+      0xXXX9: SUB-BANDWIDTH-USAGE
+      0xXXXA: SUB-STREAM-PRIORITY
       0xYYYY: NETWORK-STATUS
            ]]></artwork>
       </figure>
@@ -652,6 +699,19 @@
           </list>
         </t>
       </section>
+      <section title="SUB-STREAM-TYPE, SUB-STREAM-PRIORITY">
+          <t>
+          These attributes are identical format to their aggregate stream version
+          (STREAM-TYPE, STREAM-PRIORITY) 
+          with the addition of a transport layer identifier.  The transport
+          layer identifier is a 64 bit field which contains the unique identifier
+          of the sub-stream for which the attribute applies.
+          </t>
+          <t>
+          Currently, only RTP transport is supported with the identifier being
+          the SSRC currently used by the sub-stream.
+          </t>
+      </section>
     </section>
 
     <section title="IANA Considerations">
@@ -791,6 +851,7 @@
       <?rfc include="reference.RFC.2474"?>
       <?rfc include="reference.RFC.5389"?>
       <?rfc include="reference.RFC.5245"?>
+      <?rfc include="reference.RFC.6190"?>
       <!--<?rfc include="reference.RFC.6679"?>-->
       <?rfc include="reference.RFC.6982"?>
     </references>
