@@ -19,12 +19,11 @@
 <?rfc inline='yes' ?>
 
 <?rfc needLines="yes" ?>
-<rfc category="std" docName="draft-martinsen-tram-discuss-latest" ipr="trust200902">
+<rfc category="std" docName="draft-martinsen-stun-based-bw-mngmt-latest" ipr="trust200902">
   <front>
-    <title abbrev="DISCUSS">Differentiated prIorities and Status
-      Code-points Using Stun Signalling (DISCUSS)</title>
+    <title>STUN Based Bandwith Managment</title>
 
-    
+
     <author fullname="Paal-Erik Martinsen" initials="P.E" surname="Martinsen">
       <organization abbrev="Cisco">Cisco Systems, Inc.</organization>
       <address>
@@ -54,8 +53,6 @@
 
     <date/>
 
-    <workgroup>TRAM</workgroup>
-    
     <abstract>
       <t>
         This draft describes a mechanism for information exchange
@@ -75,7 +72,7 @@
         from this application.
       </t>
     </abstract>
-    
+
     <note title="Requirements Language">
       <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
         NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
@@ -101,7 +98,7 @@
         <xref target="I-D.ietf-rtcweb-security-arch"/>, imply that
         access lists, deep packet inspection and other static
         prioritization methods cannot be employed successfully to
-        prioritize packet flows. 
+        prioritize packet flows.
       </t>
       <t>
         The lack of congestion control in UDP may lead to problems as
@@ -115,11 +112,11 @@
         on all supported platforms and preferably without need of
         administrative privileges to set and read values. The solution
         also needs to be able to cross administrative domains without
-        the risk of being rewritten. 
+        the risk of being rewritten.
         <cref anchor="Q1" source="palmarti">
           This draft will only offer
           tamper detection of some of the values. Further discussion
-          regarding the incentive to lie is needed.   
+          regarding the incentive to lie is needed.
         </cref>
       </t>
       <!--
@@ -149,78 +146,53 @@
         network status attribute to influence rate stating points or
         rate adaption mechanisms.
       </t>
-      
+
     </section>
 
     <section title="General Usage">
       <t>
-        This draft defines several attributes that can be added to a
-        STUN message; STREAM-TYPE, BANDWIDTH-USAGE, STREAM-PRIORITY
-        and NETWORK-STATUS. See <xref target="new_attributes" /> for
+        This draft defines two attributes that can be added to a
+        STUN message; ENF-FLOW-DESCRIPTION and ENF-NETWORK-STATUS.
+        See <xref target="new_attributes" /> for
         the formal description. It is RECOMMENDED to add them to a
-        STUN request response pair, especially if the NETWORK-STATUS
+        STUN request response pair, especially if the ENF_NETWORK-STATUS
         attribute is in use. This allows the information gathered to
         be sent back to the requesting agent in the the STUN response.
       </t>
       <t>
-        The STREAM-TYPE, BANDWIDTH-USAGE, STREAM-PRIORITY attributes
+        The ENF-FLOW-DESCRIPTION attribute
         MUST be added before any INTEGRITY attribute. It is
-        RECOMMENDED to only add these attributes to STUN messages
+        RECOMMENDED to only add the attribute to STUN messages
         containing a INTEGRITY attribute as this prevents tampering
         with the content of the attribute.
       </t>
       <t>
         If the client wants to receive feedback from the network it
-        must add a null NETWORK-STATUS attribute. A null
-        NETWORK_STATUS attribute is created by filling in the all the
+        must add a null ENF-NETWORK-STATUS attribute. A null
+        ENF-NETWORK_STATUS attribute is created by filling in the all the
         fields in the attribute with 0x0 values. This attribute MUST
         be added after the INTEGRITY attribute, as on-path devices may
         write information into this attribute. Having a readily
         available attribute to write into will save the the on-path
         device from growing buffers to add their own attribute. On
-        path devices SHOULD not add their own NETWORK-STATUS attribute
+        path devices SHOULD not add their own ENF-NETWORK-STATUS attribute
         (or any other STUN attribute).
       </t>
       <t>
-        If an agent receives a STUN request with a NETWORK-STATUS
+        If an agent receives a STUN request with a ENF-NETWORK-STATUS
         attribute after the INTEGRITY attribute, it should copy the
-        content into a new NETWORK-STATUS attribute and add it before
+        content into a new ENF-NETWORK-STATUS attribute and add it before
         the INTEGRITY attribute when sending the STUN response. A new
-        null NETWORK-STATUS attribute can be added after the INTEGRITY
+        null ENF-NETWORK-STATUS attribute can be added after the INTEGRITY
         attribute. New STUN attributes described in this draft can
         also be added describing the stream in this direction.
       </t>
       <t>
-        If an agent receives a STUN response with a NETWORK-STATUS
+        If an agent receives a STUN response with a ENF-NETWORK-STATUS
         attribute before the INTEGRITY attribute, this describes the
-        stream in the upstream direction. A NETWORK-STATUS attribute
+        stream in the upstream direction. A ENF-NETWORK-STATUS attribute
         after the INTEGRITY attribute describes the stream in the
         downstream direction.
-      </t>
-      <t>
-        It might make sense to distinguish DISCUSS packets from normal STUN
-        packets. This would prevent unnecessary processing of normal
-        STUN packets on the network nodes.
-      </t>
-      <t><cref anchor="Q2" source="palmarti">
-        A few alternatives (Needs discussion):
-        ---1: 
-            Alter the STUN magic cookie. (But than i would not be a
-            STUN packet anymore, and that raises a new set of
-            problems)
-        ---2:
-            Add a special this is DISCUSS attribute. This must be the
-            first attribute in the message. This allows for network
-            node to look for DISCUSS packets at a fixed offset without
-            needing to parse the entire packet.
-        ---3:
-            Alter the transaction id. This might be problematic if
-            using it in conjunction with ICE connectivity checks. But
-            probably fine in other scenarios.
-        ---4:  
-            Define a new STUN Method. Also brakes ICE, makes it
-            harder to tag onto attributes to already in use messages.
-        </cref>
       </t>
       <t>
         <cref anchor="Q3" source="palmarti">Do we want to restrict
@@ -229,7 +201,7 @@
       </t>
       <t>
         <figure title="DISCUSS example flow">
-        <artwork><![CDATA[  
+        <artwork><![CDATA[
   Alice                router1            router2              Bob
    |                      |                   |                  |
    |Binding_Request       |                   |                  |
@@ -248,76 +220,75 @@
         </figure>
         <list style="numbers">
           <t>
-            Alice creates a Binding Request, adds STREAM-TYPE,
-            BANDWIDTH-USAGE, STREAM-PRIORITY attributes before the
-            INTEGRITY attribute and a single null NETWORK-STATUS
+            Alice creates a Binding Request, adds the ENF-FLOW-DESCRIPTION
+            attribute before the
+            INTEGRITY attribute and a single null ENF-NETWORK-STATUS
             attribute after the INTEGRITY attribute.
-          </t>              
+          </t>
           <t>
-            Router1 inspects the STUN Request message and reads any
-            STREAM-TYPE, BANDWIDTH-USAGE, or STREAM-PRIORITY
-            attributes and the information they contain. It then
-            updates the NETWORK-STATUS attribute with any information
+            Router1 inspects the STUN Request message and reads the
+            ENF-FLOW-DESCRIPTION
+            attribute and the information it contain. It then
+            updates the ENF-NETWORK-STATUS attribute with any information
             the router have. It then forwards the request.
           </t>
           <t>
             Bob processes the STUN Request. When Bob builds the
-            response, it copies the NETWORK-STATUS attribute into the
+            response, it copies the ENF-NETWORK-STATUS attribute into the
             STUN Response before the INTEGRITY check and adds new null
-            NETWORK-STATUS attribute after the INTEGRITY
+            ENF-NETWORK-STATUS attribute after the INTEGRITY
             attribute. Bob then transmits the message.
           </t>
           <t>
-            Router2 (first DISCUSS network element for the downstream
-            direction) inspects the Response message, reads the
-            STREAM-TYPE, BANDWIDTH-USAGE, or STREAM-PRIORITY
-            attributes and MAY alter the NETWORK-STATUS attribute
+            Router2 (first network element that understand the stun packets described here for the downstream
+            direction) inspects the Response message, reads the ENF-FLOW-DESCRIPTION
+            attribute and MAY alter the NETWORK-STATUS attribute
             located after the INTEGRITY attribute. It then transmits
             the message.
           </t>
           <t>
             When Alice receives the STUN Response, she can extract the
-            STREAM-TYPE, BANDWIDTH-USAGE, or STREAM-PRIORITY
-            attributes and the two NETWORK-STATUS attributes to get a
+            ENF-FLOW-DESCRIPTIONS
+            attribute and the two ENF-NETWORK-STATUS attributes to get a
             complete picture of what the remote agent is sending and
             how the status of both the upstream and downstream path.
           </t>
         </list>
       </t>
     </section>
-    
+
     <section title="Network Processing">
-      <t> 
-        This section describes the processing of DISCUSS packets by
+      <t>
+        This section describes the processing of STUN packets containing BW management information by
         network devices.
       </t>
       <section title="Packet Processing by Network Device">
         <t>
-          Network devices are said to support DISCUSS if they perform
+          Network devices are said to support the mechanisms described in this document if they perform
           inspection of packets being forward or switched in order to
-          identify an DISCUSS STUN packet.  These devices will also be
+          identify an STUN packet containing the ENF-FLOW-DESCRIPTION and ENF_NETWORK-STATUS attributes.  These devices will also be
           able to read/write STUN attributes to/from this packet.  It
           is not required that every network device in the path
-          support DISCUSS.  It is expected that DISCUSS will have the
+          support the mechanisms described in this document.  It is expected that it will have the
           most value being implemented at certain points in the
           network (PIN's) such as WAN edge devices, wireless access
           devices, and Internet gateways.
         </t>
         <t>
-          Network devices that support DISCUSS MAY utilize the
+          Network devices that support the mechanism described here MAY utilize the
           information provided by the application in the STUN
           attributes to modify their behavior.  These include the
           attributes defined in this document with the exception of
-          the NETWORK-STATUS attribute.  The NETWORK-STATUS attribute
-          SHOULD NOT be used by the DISCUSS capable network device to
+          the ENF-NETWORK-STATUS attribute.  The ENF-NETWORK-STATUS attribute
+          SHOULD NOT be used by the capable network device to
           modify its behavior.  The intent of the NETWORK-STATUS
           attribute is for the application to modify its behavior.
         </t>
         <t>
-          If the NETWORK-STATUS attributes exists in a DISCUSS packet
-          after an INTEGRITY attribute, the DISCUSS capable network
+          If the ENF-NETWORK-STATUS attributes exists in a STUN packet
+          after an INTEGRITY attribute, the capable network
           device MUST process it as described in this section.
-          NETWORK-STATUS attributes that exist before the INTEGRITY
+          ENF-NETWORK-STATUS attributes that exist before the INTEGRITY
           attribute MUST NOT be modified by the network device.  The
           modifications to the NETWORK-STATUS attribute are:
           <list style="symbols">
@@ -352,9 +323,9 @@
           applications).
         </t>
         <t>
-          The DISCUSS STUN packet SHOULD experience minimal extra
-          processing delay through the DISCUSS capable network device
-          relative to non-DISCUSS packets in the flow.  The DISCUSS
+          The STUN packet SHOULD experience minimal extra
+          processing delay through the capable network device
+          relative to non-STUN packets in the flow.  The
           STUN packet MAY be placed out of order in the packet flow,
           but SHOULD NOT be delayed more than a few packet interval
           times.
@@ -362,10 +333,9 @@
       </section>
       <section title="Interaction with DSCP">
         <t>
-          One of the attributes that may be added to the STUN packet
-          by the application is the STREAM-PRIORITY attribute.  This
-          attribute indicates the relative priority of streams inside
-          of an application session.  This attribute is compatible
+          One of the information bits that may be added to the STUN packet
+          by the application is the TYPE field in the ENF-FLOW-DESCRIPTION attribute.
+          This field is compatible
           with the use of DSCP (or other priority markings) at the
           networking layer as described in this section.
         </t>
@@ -373,32 +343,23 @@
           Since transport layer markings may be modified by middle
           boxes or devices in the path or at the interface of the
           application itself due to the lack of support in the OS
-          network stack, the STREAM-PRIORITY attribute can be used as
+          network stack, the TYPE field in the ENF-FLOW-DESCRIPTION attribute can be used as
           a mechanism for ensuring proper QoS treatment through
-          multiple domains.  DISCUSS capable device may use the
-          STREAM-PRIORITY attribute to remark the DSCP value to the
-          appropriate value.  DSCP re-marking based on STREAM-PRIORITY
-          attribute may make sense at certain PIN's, e.g. gateway
-          between network domains (e.g. managed network to/from
-          Internet), access switches in managed network, etc.  The
-          translation from the Priority number in the STREAM-PRIORITY
-          attribute to the correct transport layer marking (e.g. DSCP)
-          is implementation specific and out of the scope of this
-          document.
+          multiple domains.
         </t>
         <t>
-          <xref target="I-D.dhesikan-tsvwg-rtcweb-qos"/> provides the
+          <xref target="I-D.ietf-tsvwg-rtcweb-qos"/> provides the
           recommended DSCP values for webrtc enabled browsers to use
           for various classes of traffic.
         </t>
       </section>
     </section>
-    
+
     <section title="Interaction with ICE">
       <t>
         An ICE connectivity check is performed by sending a STUN
         Binding indication. Prior to sending the agent can add one
-        STREAM-TYPE attribute. If added, only one MUST be added. This
+        ENF-FLOW-DESCRIPTION attribute. This
         is to avoid unnecessary large STUN packets during the
         connectivity checks. If the connectivity check is sent on a
         5-tuple that multiplexes different types of media and more
@@ -408,231 +369,55 @@
       <t>
         This limits the information the STUN messages are able to
         convey during the connectivity checks, but also avoids adding
-        network confusion with BANDWIDTH-USAGE attributes describing
+        network confusion with ENF-NETWORK-STATUS attributes describing
         different paths that never going to be utilized.
       </t>
       <t>
         <cref anchor="Q4" source="palmarti">
           Problem with consent freshness if not based on STUN.
         </cref>
-      </t>  
-      
+      </t>
+
     </section>
-    <section title="Multiplexed Streams">
-      <t>
-        In some scenarios a 5-tuple can be used to transport several
-        media streams. BUNDLE
-        <xref target="I-D.ietf-mmusic-sdp-bundle-negotiation" />
-        describes such a mechanism.
-      </t>
-      <t>
-        At times, the different "streams" carried in this bundle
-        require very different treatment from the network, including
-        the ability to prioritize some of these "streams" over others.
-        For example, the application my bundle video and audio in the
-        same 5-tuple flow, but would like the network to prioritize
-        the delivery of audio over that of video in the case of
-        congestion.  Another example is the use of embedded (or
-        scalable) coding for video.  Per <xref target="RFC6190">RFC
-        6190</xref>, using Multi-session Transmission (MST) the layers
-        are transported in seperate sub-flows (RTP sessions) within
-        the bundled flow.  Using the STREAM-TYPE attribute with the
-        extension to identify the sub-flow and its priority would
-        allow network elements, if capable, to provide differentiated
-        services even in the case of bundling.
-      </t>
-      <t>
-        For RTP/SRTP based flows, the existence and attributes for
-        sub-flows in the flow MAY be indicated by the application via
-        the SUB-STREAM-xxx attributes.  These attributes MUST only be
-        included if the equivalent STREAM-xxxx attributes are
-        included.  It is expected that only a sub-set of network
-        elements representing bottleneck Points in Network (PIN) will
-        be able to inspect the higher layer protocols to differentiate
-        sub-flows, so it is important to describe the agregate flow,
-        and then the sub-flows.  The SUB-STREAM-xxxx attributes are
-        similar to the corresponding STREAM-xxxx attributes with the
-        addition of the application layer identifier field.  For the
-        case of RTP/SRTP, this field is the SSRC assigned to the flow.
-        Note that this will only work for non-header encrypted SRTP.
-      </t>
-      <t>
-        When describing the aggregate stream with a STREAM-TYPE
-        attribute there are two possibilities to describe the streams
-        that are multiplexed. Adding one attribute for each type
-        (Audio, Video,++), or to save a few bits on the wire it is
-        also possible to construct the STREAM-TYPE so a one type value
-        describes several types. For example audio have the value of 1
-        and application data have the value of 4. If the STREAM_TYPE
-        value is set to 5 the only combination that gives that is
-        audio and application data.  As previously discussed, in the
-        case of bundling, the agregate stream attribute MUST be
-        included before the optional sub-stream attributes
-      </t>
-      <t>
-        The other attributes BANDWIDTH-USAGE, STREAM-PRIORITY and
-        NETWORK-STATUS SHOULD only be added once as they describe the
-        behavior of the 5-tuple and not individual streams.
-      </t>
-    </section>
-        
+
     <section title="New STUN attributes" anchor="new_attributes" >
       <t>
         This STUN extension defines the following new attributes:
       </t>
       <figure>
         <artwork align="left"><![CDATA[
-      0xXXX0: STREAM-TYPE
-      0xXXX1: BANDWIDTH-USAGE
-      0xXXX2: STREAM-PRIORITY
-      0xXXX8: SUB-STREAM-TYPE
-      0xXXX9: SUB-BANDWIDTH-USAGE
-      0xXXXA: SUB-STREAM-PRIORITY
-      0xYYYY: NETWORK-STATUS
-           ]]></artwork>
+      0xXXX0: ENF-FLOW-DESCRIPTION
+      0xXXX1: ENF-NETWORK-STATUS
+        ]]></artwork>
       </figure>
 
-      <section title="STREAM-TYPE">
+      <section title="ENF-FLOW-DESCRIPTION">
         <t>
           This attribute have a length that are multiples of 4 (32) so
           no padding is necessary.
         </t>
-        
-        <figure anchor="stream_type_attr" title="STREAM TYPE Attribute">
+
+        <figure anchor="ENF-FLOW-DESCRIPTION_attr" title="ENF-FLOW-DESCRIPTION Attribute">
           <artwork align="left"><![CDATA[
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|              TYPE             | Interactivity |               |
+| TYPE  | BANDWIDTH-MAX     (Kbps)      | RESERVED              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
       ]]></artwork>
         </figure>
         <t>
           <list style="hanging">
-            <t hangText="TYPE:"> STREAM TYPE is a 16 bit value
-              defined in <xref target="stream_types"></xref> below describing the flow.
-              <figure anchor="stream_types" title="STREAM Types">
-                <artwork align="left"><![CDATA[
-     0x0001 Audio
-     0x0002 Video
-     0x0004 Application Data
-     0x0008 Other
-                 ]]></artwork>
-              </figure>
+            <t hangText="TYPE:"> TYPE is a 4 bit value
+              defined in <xref target="I-D.ietf-tsvwg-rtcweb-qos"/>
             </t>
-            <t hangText="Interactivity:"> Is a 8 bit value
-              defined in <xref target="interactivity_types" /> below describing the flow.
-              <figure anchor="interactivity_types" title="Interactivity Types">
-                <artwork align="left"><![CDATA[
-     0x00 Undef
-     0x01 Stream (Broadcast? Oneway?)
-     0x02 Interactive
-                     ]]></artwork>
-              </figure>
-            </t>
-          </list>
-        </t>
-        
-        <t>
-          It is possible to combine the stream types if a stream
-          contains more than one type. 
-        </t>
-        <t>
-          If a 5-tuple is used to send both a audio and video stream,
-          the stream type can be set to 0x0006. This can be useful if
-          the application wants to hint that the 5-tuple contains
-          several streams, This is useful if the attribute is added to
-          STUN binding requests during ICE connectivity checks. If
-          more information regarding multiplexed streams is needed it
-          is possible to add more than one attribute to a STUN message
-          (See section ??). This can be done to STUN messages that are
-          being sent after the connectivity check phase is finished
-          (Keep-alive, consent freshness). During this phase the added
-          size of the STUN messages pose no security threat.
-        </t>
-      </section>
-
-      <section title="BANDWIDTH-USAGE">
-        <t>
-          This attribute have a length that are multiples of 4 (32) so
-          no padding is necessary.
-        </t>
-        <figure anchor="bandwidth_usage_attr" title="BANDWIDTH USAGE Attribute">
-          <artwork align="right"><![CDATA[
-0                   1                   2                   3
-0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|             AVERAGE (kbps)    |           MAX (kbps)          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-      ]]></artwork>
-        </figure>
-        <t>
-          <list style="hanging">
-            <t hangText="AVERAGE:"> Expected sustained bandwidth usage
-              for this stream. Note that for elastic types of streams
-              like video, sudden large movements in the picture my
-              lead to this value being inaccurate.
-            </t>
-            <t hangText="MAX:"> The maximum bandwidth usage for this
-              stream. If the sustained and max value differ greatly it
-              might be safe to assume that an elastic encoder is in
-              use. (Would it be useful to say something about expected
-              BURST lengths?)
-            </t>
-            
-          </list>
-        </t>
-      </section>
-      
-      <section title="STREAM-PRIORITY">
-        <t>
-          This attribute have a length that are multiples of 4 (32) so
-          no padding is necessary.
-        </t>
-        <figure anchor="stream_priority_attr" title="STREAM PRIORITY Attribute">
-          <artwork align="right"><![CDATA[
-0                   1                   2                   3
-0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Priority      |D|    TBD      |           Stream IDX          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                           Session ID                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-      ]]></artwork>
-        </figure>
-        <t>
-          <list style="hanging">
-            
-            <t hangText="Priority:"> Describes this streams priority
-              among other streams coming from this
-              endpoint/application (With same session ID). Values
-              range from 255 (0xFF) to 0.
-            </t>
-            <t hangText="D:"> Delay sensitive. The application can set
-              this bit as a hint to the network element that the
-              stream is delay sensitive. (Unsure if this is useful)
-            </t>
-            <t hangText="Stream IDX:"> Application can choose set this
-              to ease debugging in the network. A reasonable value can
-              foe example be the index have in the SDP.
-            </t>
-            <t hangText="Session ID:"> Identification to distinguish
-              what session this stream is part of. This MUST have the
-              same value for all the media streams the application
-              wants to give differentiated services. (Note that this
-              ID may overlap with other streams that originates from a
-              different IP address. The network element MUST only
-              prioritize among streams with the same Session Id
-              originating from the same IP)
+            <t hangText="BANDWIDTH-MAX:"> Is a 16 bit value describing the max sending bitrate.
             </t>
           </list>
         </t>
       </section>
-           
-      <section title="NETWORK-STATUS">
+
+      <section title="ENF-NETWORK-STATUS">
         <t>
           This attribute have a length that are multiples of 4 (32) so
           no padding is necessary. The values are kept in the same
@@ -651,7 +436,7 @@
           along the network path by nodes that are not able to
           regenerate a correct INTEGRITY attribute.
         </t>
-        <figure anchor="network_status_attr" title="NETWORK-STATUS Attribute">
+        <figure anchor="enf_network_status_attr" title="ENF-NETWORK-STATUS Attribute">
           <artwork align="right"><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -661,7 +446,7 @@
 |   Up MAX Bitrate  (kbps)      | Down MAX Bitrate  (kbps)      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
- 
+
       ]]></artwork>
         </figure>
         <t>
@@ -696,122 +481,24 @@
           </list>
         </t>
       </section>
-      <section title="SUB-STREAM-TYPE, SUB-STREAM-PRIORITY">
-        <t>
-          These attributes are identical format to their aggregate
-          stream version (STREAM-TYPE, STREAM-PRIORITY) with the
-          addition of a transport layer identifier.  The transport
-          layer identifier is a 64 bit field which contains the unique
-          identifier of the sub-stream for which the attribute
-          applies.
-        </t>
-        <t>
-          Currently, only RTP transport is supported with the
-          identifier being the SSRC currently used by the sub-stream.
-        </t>
-      </section>
+
     </section>
 
     <section title="IANA Considerations">
       <t>
         IANA is requested to add the following attributes to the <xref
-        target="iana-stun">STUN attribute registry</xref>, 
+        target="iana-stun">STUN attribute registry</xref>,
         <list style="symbols">
           <t>
-            0xXXX0: STREAM-TYPE      (0xXXX0, in the comprehension-optional range)
+            0xXXX0: ENF-FLOW-DESCRIPTION      (0xXXX0, in the comprehension-optional range)
           </t>
           <t>
-            0xXXX1: BANDWIDTH-USAGE  (0xXXX1, in the comprehension-optional range)
+            0xXXX1: ENF-NETWORK-STATUS   (0xXXX1, in the comprehension-optional range)
           </t>
-          <t>
-            0xXXX2: STREAM-PRIORITY  (0xXXX2, in the comprehension-optional range)
-          </t>
-          <t>
-            0xYYYY: NETWORK-STATUS   (0xYYYY, in the comprehension-optional range)
-          </t>
-        </list> 
+        </list>
       </t>
     </section>
 
-    
-    <section title="Implementation Status">
-      <t>
-        [Note to RFC Editor: Please remove this section and reference to
-        <xref target="RFC6982"></xref> prior to publication.]
-      </t>
-
-      <t>
-        This section records the status of known implementations of the
-        protocol defined by this specification at the time of posting of this
-        Internet-Draft, and is based on a proposal described in <xref
-        target="RFC6982"></xref>. The description of implementations in this
-        section is intended to assist the IETF in its decision processes in
-        progressing drafts to RFCs. Please note that the listing of any
-        individual implementation here does not imply endorsement by the IETF.
-        Furthermore, no effort has been spent to verify the information
-        presented here that was supplied by IETF contributors. This is not
-        intended as, and must not be construed to be, a catalog of available
-        implementations or their features. Readers are advised to note that
-        other implementations may exist.
-      </t>
-
-      <t>
-        According to <xref target="RFC6982"></xref>, "this will allow
-        reviewers and working groups to assign due consideration to documents
-        that have the benefit of running code, which may serve as evidence of
-        valuable experimentation and feedback that have made the implemented
-        protocols more mature. It is up to the individual working groups to use
-        this information as they see fit".
-      </t>
-      
-      <section title="NATtools">
-        <t>
-          <list style="hanging">
-            <t hangText="Organization: ">Cisco 
-            </t>
-            
-            <t hangText="Description: "> 
-              Open-Source ICE, TURN and STUN implementation. 
-            </t> 
-            
-            <t hangText="Implementation: ">
-              https://github.com/cisco/NATTools
-            </t>
-            
-            <t hangText="Level of maturity: ">
-              Code is stable. Tests
-              being run to learn more on how to leverage the information
-              shared between client and network.
-            </t>
-            
-            <t hangText="Coverage: ">
-              Implements the DISCUSS attributes
-            </t>
-            
-            <t hangText="Licensing: ">
-              BSD
-            </t>
-            
-            <t hangText="Implementation experience: ">
-              Draft was implemented with internal video test
-              clients. Wireless access point implemented STUN
-              detection in the media path and acted on the information
-              in the DISCUSS attributes. After running tests in
-              different congestion scenarios it is clear that sharing
-              information between endpoint and network can help with
-              congestion and end-user experience. This approach
-              required little effort to implement on the client side.
-            </t>
-            
-            <t hangText="Contact: ">
-              Paal-Erik Martinsen
-              &lt;palmarti@cisco.com&gt;.
-            </t>
-          </list>
-        </t>
-      </section>
-    </section>
-    
     <section title="Security Considerations">
       <t>
         Due to the security implications described in <xref
@@ -834,7 +521,6 @@
       </t>
     </section>
 
-
     <section anchor="ack" title="Acknowledgements">
       <t>
         Authors would like to thank Dan Wing, Anca Zamfir, Jon Snyder
@@ -842,25 +528,24 @@
       </t>
     </section>
   </middle>
-  
+
   <back>
     <references title="Normative References">
-      &rfc2119; 
+      &rfc2119;
       <?rfc include="reference.RFC.2474"?>
       <?rfc include="reference.RFC.5389"?>
       <?rfc include="reference.RFC.5245"?>
-      <?rfc include="reference.RFC.6190"?>
       <!--<?rfc include="reference.RFC.6679"?>-->
-      <?rfc include="reference.RFC.6982"?>
+
     </references>
 
     <references title="Informational References">
       <?rfc include='reference.I-D.ietf-rtcweb-security-arch' ?>
       <?rfc include='reference.I-D.thomson-mmusic-ice-webrtc' ?>
-      <?rfc include='reference.I-D.dhesikan-tsvwg-rtcweb-qos' ?>
-      <?rfc include='reference.I-D.ietf-mmusic-sdp-bundle-negotiation' ?>
+      <?rfc include='reference.I-D.ietf-tsvwg-rtcweb-qos' ?>
+      
       <?rfc include='reference.I-D.eggert-tsvwg-rfc5405bis' ?>
-       
+
       <reference anchor="iana-stun"
                  target="http://www.iana.org/assignments/stun-parameters/stun-pa rameters.xml">
         <front>
@@ -871,11 +556,10 @@
           <date month="April" year="2011" />
         </front>
       </reference>
-      
+
       <!--<?rfc include='reference.I-D.muthu-behave-consent-freshness' ?>-->
     </references>
     <!--
       -->
   </back>
 </rfc>
-
