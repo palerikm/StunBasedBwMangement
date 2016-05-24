@@ -19,9 +19,9 @@
 <?rfc inline='yes' ?>
 
 <?rfc needLines="yes" ?>
-<rfc category="std" docName="draft-martinsen-stun-based-bw-mngmt-latest" ipr="trust200902">
+<rfc category="std" docName="draft-martinsen-stun-based-enfl-latest" ipr="trust200902">
   <front>
-    <title>STUN Based Bandwith Managment</title>
+    <title>STUN Based Explicit Network Feedback Loop (ENFL)</title>
 
 
     <author fullname="Paal-Erik Martinsen" initials="P.E" surname="Martinsen">
@@ -259,43 +259,46 @@
 
     <section title="Network Processing">
       <t>
-        This section describes the processing of STUN packets containing BW management information by
-        network devices.
+        This section describes the processing of STUN packets
+        containing ENF information by network devices.
       </t>
       <section title="Packet Processing by Network Device">
         <t>
-          Network devices are said to support the mechanisms described in this document if they perform
-          inspection of packets being forward or switched in order to
-          identify an STUN packet containing the ENF-FLOW-DESCRIPTION and ENF_NETWORK-STATUS attributes.  These devices will also be
-          able to read/write STUN attributes to/from this packet.  It
-          is not required that every network device in the path
-          support the mechanisms described in this document.  It is expected that it will have the
-          most value being implemented at certain points in the
-          network (PIN's) such as WAN edge devices, wireless access
-          devices, and Internet gateways.
+          Network devices are said to support the mechanisms described
+          in this document if they perform inspection of packets being
+          forward or switched in order to identify an STUN packet
+          containing the ENF-FLOW-DESCRIPTION and ENF_NETWORK-STATUS
+          attributes.  These devices will also be able to read/write
+          STUN attributes to/from this packet.  It is not required
+          that every network device in the path support the mechanisms
+          described in this document.  It is expected that it will
+          have the most value being implemented at certain points in
+          the network (PIN's) such as WAN edge devices, wireless
+          access devices, and Internet gateways.
         </t>
         <t>
-          Network devices that support the mechanism described here MAY utilize the
-          information provided by the application in the STUN
-          attributes to modify their behavior.  These include the
-          attributes defined in this document with the exception of
-          the ENF-NETWORK-STATUS attribute.  The ENF-NETWORK-STATUS attribute
-          SHOULD NOT be used by the capable network device to
-          modify its behavior.  The intent of the NETWORK-STATUS
+          Network devices that support the mechanism described here
+          MAY utilize the information provided by the application in
+          the STUN attributes to modify their behavior.  These include
+          the attributes defined in this document with the exception
+          of the ENF-NETWORK-STATUS attribute.  The ENF-NETWORK-STATUS
+          attribute SHOULD NOT be used by the capable network device
+          to modify its behavior.  The intent of the NETWORK-STATUS
           attribute is for the application to modify its behavior.
         </t>
         <t>
           If the ENF-NETWORK-STATUS attributes exists in a STUN packet
-          after an INTEGRITY attribute, the capable network
-          device MUST process it as described in this section.
-          ENF-NETWORK-STATUS attributes that exist before the INTEGRITY
-          attribute MUST NOT be modified by the network device.  The
-          modifications to the NETWORK-STATUS attribute are:
+          after an INTEGRITY attribute, the capable network device
+          MUST process it as described in this section.
+          ENF-NETWORK-STATUS attributes that exist before the
+          INTEGRITY attribute MUST NOT be modified by the network
+          device.  The modifications to the NETWORK-STATUS attribute
+          are:
           <list style="symbols">
             <t> Update the Node Cnt field in the attribute.  The
-              device SHALL increment this field by one unless it is at
-              its maximum (saturated) value.  If the field is at its
-              maximum value, the device SHALL NOT modify this field.
+            device SHALL increment this field by one unless it is at
+            its maximum (saturated) value.  If the field is at its
+            maximum value, the device SHALL NOT modify this field.
             </t>
             <t>
               Overwrite the attribute CS bit if the value at this
@@ -377,7 +380,6 @@
           Problem with consent freshness if not based on STUN.
         </cref>
       </t>
-
     </section>
 
     <section title="New STUN attributes" anchor="new_attributes" >
@@ -386,11 +388,14 @@
       </t>
       <figure>
         <artwork align="left"><![CDATA[
-      0xXXX0: ENF-FLOW-DESCRIPTION
-      0xXXX1: ENF-NETWORK-STATUS
+      0xC001: ENF-FLOW-DESCRIPTION
+      0xC002: ENF-NETWORK-STATUS
         ]]></artwork>
       </figure>
-
+      <t>
+        The attributes are assigned in the <xref
+        target="iana-stun">IANA STUN attribute registry</xref>.
+      </t>
       <section title="ENF-FLOW-DESCRIPTION">
         <t>
           This attribute have a length that are multiples of 4 (32) so
@@ -402,7 +407,7 @@
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| TYPE  | BANDWIDTH-MAX     (Kbps)      | RESERVED              |
+| TYPE  |  TBD  |     BANDWIDTH-MAX     (Kbps)  |     TBD       |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       ]]></artwork>
         </figure>
@@ -486,14 +491,19 @@
 
     <section title="IANA Considerations">
       <t>
-        IANA is requested to add the following attributes to the <xref
+        If this draft becomes an RFC IANA is requested to move the
+        following attributes from the to the Designated Expert
+        comprehension-optional range to the IETF Review
+        comprehension-optional range in the <xref
         target="iana-stun">STUN attribute registry</xref>,
         <list style="symbols">
           <t>
-            0xXXX0: ENF-FLOW-DESCRIPTION      (0xXXX0, in the comprehension-optional range)
+            0xC001: ENF-FLOW-DESCRIPTION (0xXXX0, in the
+            comprehension-optional range)
           </t>
           <t>
-            0xXXX1: ENF-NETWORK-STATUS   (0xXXX1, in the comprehension-optional range)
+            0xC002: ENF-NETWORK-STATUS (0xXXX1, in the
+            comprehension-optional range)
           </t>
         </list>
       </t>
@@ -547,13 +557,13 @@
       <?rfc include='reference.I-D.eggert-tsvwg-rfc5405bis' ?>
 
       <reference anchor="iana-stun"
-                 target="http://www.iana.org/assignments/stun-parameters/stun-pa rameters.xml">
+                 target="http://www.iana.org/assignments/stun-parameters/stun-pa rameters.xhtml">
         <front>
           <title>IANA: STUN Attributes</title>
           <author fullname="IANA" surname="IANA">
             <organization></organization>
           </author>
-          <date month="April" year="2011" />
+          <date month="April" year="2016" />
         </front>
       </reference>
 
